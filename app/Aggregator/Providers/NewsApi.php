@@ -3,6 +3,7 @@
 namespace App\Aggregator\Providers;
 
 use App\Contracts\NewsProviderContract;
+use App\Support\NewsProviderOptions;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -15,21 +16,17 @@ class NewsApi implements NewsProviderContract
     /**
      * Fetch the latest news from the provider.
      *
-     * @param  string  $fromDate  Minimum date and time for the oldest article allowed.
-     * @param  string  $toDate  Maximum date and time for the newest article allowed.
-     * @param  int  $limit  Maximum number of articles to fetch.
-     *
      * @see https://newsapi.org/docs/endpoints/everything
      */
-    public function fetchLatestNewsCursor(string $fromDate, string $toDate, int $limit = 50): LazyCollection
+    public function fetchLatestNewsCursor(NewsProviderOptions $options): LazyCollection
     {
-        return LazyCollection::make(function () use ($fromDate, $toDate, $limit) {
+        return LazyCollection::make(function () use (&$options) {
             $currentPage = 1;
             $totalFetched = 0;
 
             do {
                 // Get response for current page
-                $response = $this->fetchPage($fromDate, $toDate, $currentPage);
+                $response = $this->fetchPage($options, $currentPage);
 
                 // Break if request failed or no results
                 if (! $response || $response->failed()) {
@@ -50,7 +47,7 @@ class NewsApi implements NewsProviderContract
                     $totalFetched++;
 
                     // Stop if we've reached the limit
-                    if ($totalFetched >= $limit) {
+                    if ($totalFetched >= $options->getLimit()) {
                         return;
                     }
                 }
@@ -66,19 +63,24 @@ class NewsApi implements NewsProviderContract
         });
     }
 
-    /**
-     * Fetch a single page of results from NewsAPI
-     *
-     * @param  string  $fromDate  The start date for articles
-     * @param  string  $toDate  The end date for articles
-     * @param  int  $pageSize  Number of articles per page
-     * @param  int  $page  Page number to fetch
-     */
-    protected function fetchPage(string $fromDate, string $toDate, int $page): ?Response
+    protected function fetchPage(NewsProviderOptions $options, int $page): ?Response
     {
+        /*
+        q
+            Keywords or phrases to search for in the article title and body.
+
+            Advanced search is supported here:
+
+            Surround phrases with quotes (") for exact match.
+            Prepend words or phrases that must appear with a + symbol. Eg: +bitcoin
+            Prepend words that must not appear with a - symbol. Eg: -bitcoin
+            Alternatively you can use the AND / OR / NOT keywords, and optionally group these with parenthesis. Eg: crypto AND (ethereum OR litecoin) NOT bitcoin.
+            The complete value for q must be URL-encoded. Max length: 500 chars.
+        */
         $response = $this->http()->get('everything', [
-            'from' => $fromDate,
-            'to' => $toDate,
+            'q' => empty($options->getKeywords()) ? null : implode(' OR ', $options->getKeywords()),
+            'from' => $options->getFromDate()->toIso8601String(),
+            'to' => $options->getToDate()->toIso8601String(),
             'language' => 'en',
             'pageSize' => 100,
             'page' => $page,
@@ -99,6 +101,9 @@ class NewsApi implements NewsProviderContract
     {
         return Http::withHeaders([
             'X-Api-Key' => $this->config['api_key'],
-        ])->baseUrl($this->config['base_url']);
+        ])
+            ->baseUrl($this->config['base_url'])
+            ->asJson()
+            ->acceptJson();
     }
 }
