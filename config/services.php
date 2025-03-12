@@ -42,6 +42,10 @@ return [
             'api_key' => env('NEWS_API_KEY'),
             'base_url' => env('NEWS_API_BASE_URL', 'https://newsapi.org/v2'),
         ],
+        NewsProviderEnum::NEWS_AI->value => [
+            'api_key' => env('NEWS_AI_KEY'),
+            'base_url' => env('NEWS_AI_BASE_URL', 'https://eventregistry.org/api/v1'),
+        ],
     ],
 
 ];

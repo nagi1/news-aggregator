@@ -9,14 +9,14 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\LazyCollection;
 
-class NewsApi implements NewsProviderContract
+class NewsAi implements NewsProviderContract
 {
     public function __construct(protected array $config) {}
 
     /**
      * Fetch the latest news from the provider.
      *
-     * @see https://newsapi.org/docs/endpoints/everything
+     * @see https://newsapi.ai/documentation?tab=searchArticles
      */
     public function fetchLatestNewsCursor(NewsProviderOptions $options): LazyCollection
     {
@@ -66,28 +66,46 @@ class NewsApi implements NewsProviderContract
     protected function fetchPage(NewsProviderOptions $options, int $page): ?Response
     {
         /*
-        q
-            Keywords or phrases to search for in the article title and body.
-
-            Advanced search is supported here:
-
-            Surround phrases with quotes (") for exact match.
-            Prepend words or phrases that must appear with a + symbol. Eg: +bitcoin
-            Prepend words that must not appear with a - symbol. Eg: -bitcoin
-            Alternatively you can use the AND / OR / NOT keywords, and optionally group these with parenthesis. Eg: crypto AND (ethereum OR litecoin) NOT bitcoin.
-            The complete value for q must be URL-encoded. Max length: 500 chars.
+        "query": {
+        "$query": {
+            "categoryUri": "dmoz/Computers/Artificial_Intelligence/Agents"
+        },
+        "$filter": {
+            "forceMaxDataTimeWindow": "31"
+        }
         */
-        $searchTerms = [
-            ...$options->getKeywords(),
-            ...$options->getCategories(),
-        ];
-        $response = $this->http()->get('everything', [
-            'q' => empty($searchTerms) ? null : implode(' OR ', $searchTerms),
-            'from' => $options->getFromDate()->toIso8601String(),
-            'to' => $options->getToDate()->toIso8601String(),
-            'language' => 'en',
-            'pageSize' => 100,
-            'page' => $page,
+        $categories = collect($options->getCategories())->map(function ($category) {
+            return [
+                'categoryUri' => $category,
+            ];
+        });
+
+        $response = $this->http()->get('article/getArticles', [
+            'query' => [
+                '$query' => [
+                    '$or' => collect($options->getKeywords())->map(function ($keyword) {
+                        return [
+                            'keyword' => $keyword,
+                            'keywordLoc' => 'title',
+                        ];
+                    })
+                        ->merge($categories)
+                        ->toArray(),
+
+                ],
+            ],
+            'dateStart' => $options->getFromDate()->format('Y-m-d'),
+            'dateEnd' => $options->getToDate()->format('Y-m-d'),
+            'lang' => 'eng',
+            'isDuplicateFilter' => 'skipDuplicates',
+            'articlesCount' => 100,
+            'articlesPage' => $page,
+            'dataType' => ['news'],
+            'articlesSortByAsc' => false,
+            'resultType' => 'articles',
+            'action' => 'getArticles',
+            'includeArticleCategories' => true,
+            'apiKey' => $this->config['api_key'],
         ]);
 
         if ($response->failed()) {
@@ -103,10 +121,7 @@ class NewsApi implements NewsProviderContract
 
     public function http(): PendingRequest
     {
-        return Http::withHeaders([
-            'X-Api-Key' => $this->config['api_key'],
-        ])
-            ->baseUrl($this->config['base_url'])
+        return Http::baseUrl($this->config['base_url'])
             ->asJson()
             ->acceptJson();
     }

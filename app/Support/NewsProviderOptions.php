@@ -17,7 +17,7 @@ class NewsProviderOptions
         public Carbon $fromDate,
         public ?Carbon $toDate = null,
         public int $limit = 50,
-        protected $keywords = []
+        protected $keywords = [],
     ) {
         $this->toDate = $toDate ?? now();
     }

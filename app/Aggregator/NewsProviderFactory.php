@@ -14,7 +14,8 @@ class NewsProviderFactory
         $config = Config::get('services.news.'.$provider->value);
 
         return match ($provider->value) {
-            $provider->value => app(NewsApi::class, ['config' => $config]),
+            NewsProviderEnum::NEWS_API->value => app(NewsApi::class, ['config' => $config]),
+            NewsProviderEnum::NEWS_AI->value => app(NewsApi::class, ['config' => $config]),
             default => throw new \InvalidArgumentException('Invalid news provider'),
         };
     }

@@ -26,7 +26,9 @@ class FetchArticlesFromNewsApiJob implements ShouldQueue
                 fromDate: now()->subMinutes(20),
                 toDate: now(),
                 limit: 100,
+                // Todo use user referencs
                 keywords: ['Elon Musk', 'SpaceX', 'Tesla'],
+                catergoies : ['cars']
             )
         )
             ->chunk(50)
