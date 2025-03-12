@@ -29,13 +29,17 @@ class FetchArticlesFromNewsApiJob implements ShouldQueue
             ->each(function (LazyCollection $articlesBatch) {
                 $articlesBatch = $articlesBatch->map(function (array $article) {
                     $article['slug'] = str($article['title'])->limit(120, '')->slug()->toString();
+
+                    return $article;
                 });
 
                 $duplicateSlugs = Article::query()
+                    ->where('api_provider', NewsProviderEnum::NEWS_API)
                     ->whereIn('slug', $articlesBatch->pluck('slug'))
                     ->pluck('slug');
 
                 $articlesBatch
+                    ->filter()
                     ->filter(function (array $article) use ($duplicateSlugs) {
                         return ! $duplicateSlugs->contains($article['slug']);
                     })
