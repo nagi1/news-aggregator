@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\NewsProviderEnum;
+
 return [
 
     /*
@@ -32,6 +34,13 @@ return [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+        ],
+    ],
+
+    'news' => [
+        NewsProviderEnum::NEWS_API->value => [
+            'api_key' => env('NEWS_API_KEY'),
+            'base_url' => env('NEWS_API_BASE_URL', 'https://newsapi.org/v2'),
         ],
     ],
 
