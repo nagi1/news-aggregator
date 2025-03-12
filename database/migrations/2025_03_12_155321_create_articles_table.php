@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('slug')->index();
             $table->string('title');
+            $table->string('api_provider')->index();
             $table->string('source')->index();
             $table->string('author')->nullable();
             $table->string('category')->nullable();

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\NewsProviderEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,6 +15,7 @@ class Article extends Model
     {
         return [
             'published_at' => 'datetime',
+            'api_provider' => NewsProviderEnum::class,
         ];
     }
 }
