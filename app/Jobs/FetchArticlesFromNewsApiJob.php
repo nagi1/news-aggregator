@@ -6,6 +6,7 @@ use App\Aggregator\NewsProviderFactory;
 use App\Aggregator\Providers\NewsApi;
 use App\Enums\NewsProviderEnum;
 use App\Models\Article;
+use App\Support\NewsProviderOptions;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\LazyCollection;
@@ -21,9 +22,12 @@ class FetchArticlesFromNewsApiJob implements ShouldQueue
 
         // A date and optional time for the oldest article allowed. This should be in ISO 8601 format for the last 20 minutes.
         $newsApiProvider->fetchLatestNewsCursor(
-            fromDate: now()->subMinutes(20)->toIso8601String(),
-            toDate: now()->toIso8601String(),
-            limit: 100
+            new NewsProviderOptions(
+                fromDate: now()->subMinutes(20),
+                toDate: now(),
+                limit: 100,
+                keywords: ['Elon Musk', 'SpaceX', 'Tesla'],
+            )
         )
             ->chunk(50)
             ->each(function (LazyCollection $articlesBatch) {
