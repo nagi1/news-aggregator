@@ -8,4 +8,4 @@ Schedule::call(function () {
     foreach (NewsProviderEnum::cases() as $provider) {
         Artisan::call('fetch:news', ['provider' => $provider->value]);
     }
-})->everyFifteenMinutes();
+})->everySixHours();
