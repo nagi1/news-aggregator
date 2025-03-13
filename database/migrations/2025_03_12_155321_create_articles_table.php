@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('articles', function (Blueprint $table) {
             $table->id();
-            $table->string('slug')->index();
+            $table->string('slug', 500)->index();
             $table->string('title');
             $table->string('api_provider')->index();
-            $table->string('source')->index();
+            $table->string('source')->nullable()->index();
             $table->string('author')->nullable();
             $table->string('category')->nullable();
             $table->string('description')->index();
