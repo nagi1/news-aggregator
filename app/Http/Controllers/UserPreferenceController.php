@@ -15,7 +15,10 @@ class UserPreferenceController extends Controller
     public function update(UpdateUserPreferenceRequest $request)
     {
         $request->user()->update([
-            'preferences' => $request->validated(),
+            'preferences' => array_merge(
+                $request->user()->preferences ?? [],
+                $request->validated()
+            ),
         ]);
 
         return UserPreferenceResource::collection(auth()->user()->preferences ?? []);
