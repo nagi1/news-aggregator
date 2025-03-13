@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('source')->nullable()->index();
             $table->string('author')->nullable();
             $table->string('category')->nullable();
-            $table->string('description')->index();
-            $table->text('content')->nullable();
+            $table->text('description')->fulltext()->nullable();
+            $table->longText('content')->fulltext()->nullable();
             $table->string('url')->nullable();
             $table->string('image')->nullable();
             $table->dateTime('published_at');

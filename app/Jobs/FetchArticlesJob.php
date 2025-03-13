@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Aggregator\NewsProviderFactory;
 use App\Enums\NewsProviderEnum;
 use App\Models\Article;
+use App\Models\User;
 use App\Models\UserPreference;
 use App\Support\ArticleDto;
 use App\Support\NewsProviderOptions;
@@ -44,7 +45,7 @@ class FetchArticlesJob implements ShouldQueue
             ->each(function (LazyCollection $articlesBatch) {
                 $duplicateSlugs = Article::query()
                     ->where('api_provider', $this->provider)
-                    ->whereIn('slug', $articlesBatch->pluck(fn (ArticleDto $article) => $article->slug))
+                    ->whereIn('slug', $articlesBatch->map(fn (ArticleDto $article) => $article->slug)->toArray())
                     ->pluck('slug');
 
                 $articlesBatch
@@ -71,18 +72,19 @@ class FetchArticlesJob implements ShouldQueue
 
     private function getUsersPreferences(): array
     {
-        $preferences = UserPreference::query()
+        $preferences = User::query()
+            ->select('preferences')
             ->inRandomOrder()
             ->limit(5)
             ->get();
 
         // merge preferences (keywords, categories, sources, authors) into a single array
-        return $preferences->reduce(function (array $carry, UserPreference $preference) {
+        return $preferences->reduce(function (array $carry, User $user) {
             return array_merge($carry, [
-                'keywords' => array_merge($carry['keywords'] ?? [], $preference->keywords),
-                'categories' => array_merge($carry['categories'] ?? [], $preference->categories),
-                'sources' => array_merge($carry['sources'] ?? [], $preference->sources),
-                'authors' => array_merge($carry['authors'] ?? [], $preference->authors),
+                'keywords' => array_merge($carry['keywords'] ?? [], $user->preferences['keywords'] ?? []),
+                'categories' => array_merge($carry['categories'] ?? [], $user->preferences['categories'] ?? []),
+                'sources' => array_merge($carry['sources'] ?? [], $user->preferences['sources'] ?? []),
+                'authors' => array_merge($carry['authors'] ?? [], $user->preferences['authors'] ?? []),
             ]);
         }, []);
     }
