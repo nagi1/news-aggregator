@@ -2,67 +2,21 @@
 
 namespace App\Aggregator\Providers;
 
-use App\Contracts\NewsProviderContract;
+use App\Aggregator\AbstractNewsProvider;
+use App\Enums\NewsProviderEnum;
+use App\Support\ArticleDto;
 use App\Support\NewsProviderOptions;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\LazyCollection;
+use Illuminate\Support\Carbon;
 
-class NewsApi implements NewsProviderContract
+class NewsApi extends AbstractNewsProvider
 {
-    public function __construct(protected array $config) {}
-
     /**
-     * Fetch the latest news from the provider.
+     * Fetch the latest news from the next page.
      *
      * @see https://newsapi.org/docs/endpoints/everything
      */
-    public function fetchLatestNewsCursor(NewsProviderOptions $options): LazyCollection
-    {
-        return LazyCollection::make(function () use (&$options) {
-            $currentPage = 1;
-            $totalFetched = 0;
-
-            do {
-                // Get response for current page
-                $response = $this->fetchPage($options, $currentPage);
-
-                // Break if request failed or no results
-                if (! $response || $response->failed()) {
-                    break;
-                }
-
-                $totalResults = $response->json('totalResults', 0);
-
-                if ($totalResults === 0) {
-                    break;
-                }
-
-                // Process articles
-                $articles = $response->json('articles', []);
-
-                foreach ($articles as $article) {
-                    yield $article;
-                    $totalFetched++;
-
-                    // Stop if we've reached the limit
-                    if ($totalFetched >= $options->getLimit()) {
-                        return;
-                    }
-                }
-
-                // Move to next page
-                $currentPage++;
-
-                // Stop if we've processed all available articles
-                if ($currentPage > ceil($totalResults / 100)) {
-                    break;
-                }
-            } while (true);
-        });
-    }
-
     protected function fetchPage(NewsProviderOptions $options, int $page): ?Response
     {
         /*
@@ -80,13 +34,16 @@ class NewsApi implements NewsProviderContract
         $searchTerms = [
             ...$options->getKeywords(),
             ...$options->getCategories(),
+            ...$options->getAuthors(),
+            ...$options->getSources(),
         ];
+
         $response = $this->http()->get('everything', [
             'q' => empty($searchTerms) ? null : implode(' OR ', $searchTerms),
             'from' => $options->getFromDate()->toIso8601String(),
             'to' => $options->getToDate()->toIso8601String(),
             'language' => 'en',
-            'pageSize' => 100,
+            'pageSize' => $options->getLimit(),
             'page' => $page,
         ]);
 
@@ -101,13 +58,26 @@ class NewsApi implements NewsProviderContract
         return $response;
     }
 
+    protected function normalizeArticle(array $article): ArticleDto
+    {
+        return new ArticleDto(
+            slug: str($article['title'])->slug('-')->toString(),
+            title: $article['title'],
+            description: $article['description'],
+            url: $article['url'],
+            publishedAt: Carbon::parse($article['publishedAt']),
+            content: $article['content'],
+            source: data_get($article, 'source.name'),
+            author: $article['author'],
+            image: data_get($article, 'urlToImage'),
+            apiProvider: NewsProviderEnum::NEWS_API,
+        );
+    }
+
     public function http(): PendingRequest
     {
-        return Http::withHeaders([
+        return parent::http()->withHeaders([
             'X-Api-Key' => $this->config['api_key'],
-        ])
-            ->baseUrl($this->config['base_url'])
-            ->asJson()
-            ->acceptJson();
+        ]);
     }
 }

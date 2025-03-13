@@ -6,4 +6,5 @@ enum NewsProviderEnum: string
 {
     case NEWS_API = 'news-api';
     case NEWS_AI = 'news-ai';
+    case GUARDIAN = 'guardian';
 }

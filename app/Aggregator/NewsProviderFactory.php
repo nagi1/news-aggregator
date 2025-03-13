@@ -2,6 +2,8 @@
 
 namespace App\Aggregator;
 
+use App\Aggregator\Providers\GuardianNewsApi;
+use App\Aggregator\Providers\NewsAi;
 use App\Aggregator\Providers\NewsApi;
 use App\Contracts\NewsProviderContract;
 use App\Enums\NewsProviderEnum;
@@ -15,7 +17,8 @@ class NewsProviderFactory
 
         return match ($provider->value) {
             NewsProviderEnum::NEWS_API->value => app(NewsApi::class, ['config' => $config]),
-            NewsProviderEnum::NEWS_AI->value => app(NewsApi::class, ['config' => $config]),
+            NewsProviderEnum::NEWS_AI->value => app(NewsAi::class, ['config' => $config]),
+            NewsProviderEnum::GUARDIAN->value => app(GuardianNewsApi::class, ['config' => $config]),
             default => throw new \InvalidArgumentException('Invalid news provider'),
         };
     }

@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Foundation\Console\ClosureCommand;
-use Illuminate\Foundation\Inspiring;
+use App\Enums\NewsProviderEnum;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    /** @var ClosureCommand $this */
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Schedule::call(function () {
+    foreach (NewsProviderEnum::cases() as $provider) {
+        Artisan::call('fetch:news', ['provider' => $provider->value]);
+    }
+})->everyFifteenMinutes();
