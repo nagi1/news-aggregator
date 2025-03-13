@@ -2,7 +2,7 @@
 
 use App\Aggregator\Providers\NewsApi;
 use App\Enums\NewsProviderEnum;
-use App\Jobs\FetchArticlesFromNewsApiJob;
+use App\Jobs\FetchArticlesJob;
 use App\Models\Article;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -54,7 +54,7 @@ test('job fetches and stores news articles', function () {
     ]);
 
     // Execute the job
-    (new FetchArticlesFromNewsApiJob)->handle();
+    (new FetchArticlesJob)->handle();
 
     // Verify articles were saved
     expect(Article::count())->toBe(3);
@@ -106,7 +106,7 @@ test('job ignores duplicate articles based on slug', function () {
     ]);
 
     // Execute the job
-    (new FetchArticlesFromNewsApiJob)->handle();
+    (new FetchArticlesJob)->handle();
 
     // Verify only the new article was added (total should be 2)
     expect(Article::count())->toBe(2)
@@ -139,7 +139,7 @@ test('job handles chunking of large article collections', function () {
     ]);
 
     // Execute the job
-    (new FetchArticlesFromNewsApiJob)->handle();
+    (new FetchArticlesJob)->handle();
 
     // Verify all articles were saved despite chunking
     expect(Article::count())->toBe(60);
@@ -172,7 +172,7 @@ test('job limits title in slug to 120 characters', function () {
     ]);
 
     // Execute the job
-    (new FetchArticlesFromNewsApiJob)->handle();
+    (new FetchArticlesJob)->handle();
 
     // Verify the slug was limited properly
     $article = Article::first();
@@ -191,7 +191,7 @@ test('job handles API errors gracefully', function () {
     ]);
 
     // Execute the job and expect it not to throw an exception
-    expect(fn () => (new FetchArticlesFromNewsApiJob)->handle())
+    expect(fn () => (new FetchArticlesJob)->handle())
         ->not->toThrow(\Exception::class);
 
     // Verify no articles were saved
