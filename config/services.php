@@ -46,6 +46,11 @@ return [
             'api_key' => env('NEWS_AI_KEY'),
             'base_url' => env('NEWS_AI_BASE_URL', 'https://eventregistry.org/api/v1'),
         ],
+
+        NewsProviderEnum::GUARDIAN->value => [
+            'api_key' => env('GUARDIAN_KEY'),
+            'base_url' => env('GUARDIAN_BASE_URL', 'https://content.guardianapis.com'),
+        ],
     ],
 
 ];
