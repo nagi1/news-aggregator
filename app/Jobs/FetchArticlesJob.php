@@ -18,7 +18,7 @@ class FetchArticlesJob implements ShouldQueue
 
     protected NewsProviderEnum $provider;
 
-    public function __construct(string $provider)
+    public function __construct(string $provider, protected int $limit = 100)
     {
         $this->provider = NewsProviderEnum::from($provider);
     }
@@ -33,11 +33,11 @@ class FetchArticlesJob implements ShouldQueue
             new NewsProviderOptions(
                 fromDate: now()->yesterday(),
                 toDate: now(),
-                limit: 100,
-                keywords: $usersPreferences['keywords'],
-                categories : $usersPreferences['categories'],
-                sources : $usersPreferences['sources'],
-                authors : $usersPreferences['authors'],
+                limit: $this->limit,
+                keywords: $usersPreferences['keywords'] ?? [],
+                categories : $usersPreferences['categories'] ?? [],
+                sources : $usersPreferences['sources'] ?? [],
+                authors : $usersPreferences['authors'] ?? [],
             )
         )
             ->chunk(50)
