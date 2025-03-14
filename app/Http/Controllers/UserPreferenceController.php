@@ -21,6 +21,6 @@ class UserPreferenceController extends Controller
             ),
         ]);
 
-        return UserPreferenceResource::collection(auth()->user()->preferences ?? []);
+        return UserPreferenceResource::make(auth()->user()->preferences ?? []);
     }
 }
