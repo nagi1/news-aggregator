@@ -59,11 +59,41 @@ php artisan key:generate
 php artisan migrate
 ```
 
-6. Generate Test User and Get Authorization Token
+6. Prepare Testing database
+
+```bash
+php artisan prepare-test-db
+```
+
+7. Run Tests
+
+```bash
+php artisan test
+```
+
+8. Get API Keys from news providers and edit `.env` file
+
+```bash
+# NEWS_API_KEY=
+# NEWS_AI_KEY=
+# GUARDIAN_KEY=
+```
+
+9. Fetch News from Providers
+
+```bash
+php artisan fetch:news news-api
+php artisan fetch:news news-ai
+php artisan fetch:news guardian
+```
+
+10. Generate Test User and Get Authorization Token
 
 ```bash
 php artisan create:test-user
 ```
+
+11. Enjoy!
 
 ## Usage
 
