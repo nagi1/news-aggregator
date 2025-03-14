@@ -6,7 +6,6 @@ use App\Aggregator\NewsProviderFactory;
 use App\Enums\NewsProviderEnum;
 use App\Models\Article;
 use App\Models\User;
-use App\Models\UserPreference;
 use App\Support\ArticleDto;
 use App\Support\NewsProviderOptions;
 use Illuminate\Contracts\Queue\ShouldQueue;

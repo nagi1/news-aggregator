@@ -14,6 +14,7 @@ class GuardianNewsApi extends AbstractNewsProvider
     public static $totalResultsKey = 'response.total';
 
     public static $articlesKey = 'response.results';
+
     /**
      * Fetch the latest news from the next page.
      *
