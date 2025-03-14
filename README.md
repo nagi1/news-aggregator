@@ -32,7 +32,7 @@ This project is a case study for the Laravel framework.
 1. Clone the repository
 
 ```bash
-git clone
+git clone git@github.com:nagi1/news-aggregator.git
 ```
 
 2. Install dependencies
@@ -59,6 +59,12 @@ php artisan key:generate
 php artisan migrate
 ```
 
+6. Generate Test User and Get Authorization Token
+
+```bash
+php artisan create:test-user
+```
+
 ## Usage
 
 ### Fetch News From Providers
@@ -74,6 +80,16 @@ Where `{provider}` is one of the following from `NewsProviderEnum`:
 -   `news-api`
 -   `news-ai`
 -   `guardian`
+
+## API Endpoints
+
+### Authentication
+
+For authentication, send the authorization token in the header as follows:
+
+```bash
+Authorization Bearer {token}
+```
 
 ### Display News
 
