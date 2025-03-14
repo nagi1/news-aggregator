@@ -1,66 +1,199 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel News Aggregator
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is a simple news aggregator that fetches news from different sources and displays them using api.
 
-## About Laravel
+This project is a case study for the Laravel framework.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   Fetch news from different sources through command line `php artisan fetch:news {provider}`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+-   Display news from different sources through api `api/articles`
 
-## Learning Laravel
+-   List and Update User Preferences `api/user-preferences`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+-   Fetching news regularly using Laravel Scheduler (every 6 hours)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+-   Full test coverage (90%+)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Supported News Providers
 
-## Laravel Sponsors
+-   [News API](https://newsapi.org/)
+-   [News AI](https://newsapi.ai/documentation?tab=searchArticles)
+-   [The Guardian](https://open-platform.theguardian.com/documentation/search)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Technical Requirements
 
-### Premium Partners
+-   PHP 8.3
+-   Laravel 12
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Installation
 
-## Contributing
+1. Clone the repository
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+git clone
+```
 
-## Code of Conduct
+2. Install dependencies
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+composer install
+```
 
-## Security Vulnerabilities
+3. Create a `.env` file
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cp .env.example .env
+```
 
-## License
+4. Generate an application key
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan key:generate
+```
+
+5. Run the migrations
+
+```bash
+php artisan migrate
+```
+
+## Usage
+
+### Fetch News From Providers
+
+To fetch news from a provider, use the following command:
+
+```bash
+php artisan fetch:news {provider}
+```
+
+Where `{provider}` is one of the following from `NewsProviderEnum`:
+
+-   `news-api`
+-   `news-ai`
+-   `guardian`
+
+### Display News
+
+For displaying news, use the following endpoint:
+
+```bash
+GET api/articles
+```
+
+You have options to filter and search for articles using the following query parameters:
+
+-   `search` - Search for articles using the keyword in the title or description or content.
+
+-   `sources` - Filter articles by source.
+
+-   `category` - Filter articles by category.
+
+-   `date` - Filter articles by date. Format: `Y-m-d`
+
+You can pass `all` to just list all of the articles without any filter.
+
+This endpoint is paginated and you can use the following query parameters to navigate through the pages.
+
+Response:
+
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "slug": "non-reiciendis-tenetur-voluptas-aut-qui-et-officiis",
+            "title": "New Technology in Coding",
+            "api_provider": "news-api",
+            "source": "TechCrunch",
+            "author": "Mrs. Lavina Mayer Jr.",
+            "category": "Technology",
+            "description": "Et quia a esse quas autem asperiores.",
+            "content": "Sit delectus dolor velit est et nihil ab. Mollitia quod sint id dignissimos ut quo ipsam. Ut sunt sit officia commodi et facilis. Exercitationem sint aut aut. Quia et omnis et fugiat.",
+            "url": "http://www.altenwerth.org/tempore-impedit-autem-tenetur-aspernatur-dignissimos-velit-aspernatur-eum",
+            "image": "https://via.placeholder.com/640x480.png/005588?text=harum",
+            "published_at": "1995-11-15T21:10:20.000000Z",
+            "created_at": "2025-01-01T12:00:00.000000Z",
+            "updated_at": "2025-01-01T12:00:00.000000Z"
+        }
+    ],
+    "links": {
+        "first": "http://news-aggregation.test/api/articles?page=1",
+        "last": "http://news-aggregation.test/api/articles?page=1",
+        "prev": null,
+        "next": null
+    },
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "links": [
+            { "url": null, "label": "&laquo; Previous", "active": false },
+            {
+                "url": "http://news-aggregation.test/api/articles?page=1",
+                "label": "1",
+                "active": true
+            },
+            { "url": null, "label": "Next &raquo;", "active": false }
+        ],
+        "path": "http://news-aggregation.test/api/articles",
+        "per_page": 50,
+        "to": 1,
+        "total": 1
+    }
+}
+```
+
+### User Preferences
+
+For listing and updating user preferences, use the following endpoints:
+
+```bash
+GET api/user-preferences
+```
+
+Response:
+
+```json
+{
+    "data": {
+        "categories": ["business", "entertainment"],
+        "sources": ["bbc-news", "cnn"],
+        "keywords": ["apple", "microsoft"],
+        "authors": ["John Doe", "Jane Doe"]
+    }
+}
+```
+
+```bash
+PUT api/user-preferences
+```
+
+Request:
+
+```json
+{
+    "categories": ["business", "entertainment"],
+    "sources": ["bbc-news", "cnn"],
+    "keywords": ["apple", "microsoft"],
+    "authors": ["John Doe", "Jane Doe"]
+}
+```
+
+## Tests
+
+I used Laravel Pest for testing. To run the tests, use the following command:
+
+Because `fullText` search was used in the articles table, testing using SQLite will not work. Therefore, I recommend using MySQL for testing.
+
+For your convenience, I have created a command that prepares the test database for you.
+
+```bash
+php artisan prepare-test-db
+```
+
+```bash
+./vendor/bin/pest
+```
