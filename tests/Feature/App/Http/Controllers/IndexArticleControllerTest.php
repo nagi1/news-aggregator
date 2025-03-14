@@ -39,7 +39,7 @@ test('it returns articles based on user preferences when no search criteria is p
         'category' => 'Sports',
     ]);
 
-    $response = $this->actingAs($this->user)->getJson(route('articles.index'));
+    $response = actingAs($this->user)->getJson(route('articles.index'));
 
     $response->assertOk()
         ->assertJsonCount(1, 'data')
